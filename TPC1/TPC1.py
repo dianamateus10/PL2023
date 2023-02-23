@@ -5,13 +5,11 @@ from distfit import distfit
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-def distFunction(sickPeople, column):
+def distFunction(sickPeople, column, bins):
     #stores the values of the column
     value_counts = sickPeople[column].value_counts()
     #calculates the total number of indexes
     total_count = value_counts.sum()
-    print(total_count)
     #creates a new dataframe for the distribution with the counts and percentages
     distribution = pd.DataFrame({'Ranges': value_counts.index.sort_values(), 'Count': value_counts.values, 'Frequency': round(value_counts / total_count, 4)})
     #removes all distributions equal to zero
@@ -20,6 +18,8 @@ def distFunction(sickPeople, column):
     distribution = distribution.sort_values('Ranges', ascending=True)
     #prints the distribution table
     print(distribution.to_string(index=False))
+
+    
 
 
 def colesterolGroups(lines):
@@ -37,7 +37,7 @@ def colesterolGroups(lines):
     sickPeople = lines[lines['temDoença'] == 1]
     #prints the distribution table
     print("Distribution of sick people by colesterol levels groups")
-    distFunction(sickPeople, 'colesterolDist')
+    distFunction(sickPeople, 'colesterolDist', bins)
 
 def ageGroups(lines):
     #creates the ranges, not bounded on the right
@@ -49,7 +49,7 @@ def ageGroups(lines):
     sickPeople = lines[lines['temDoença'] == 1]
     #prints the distribution table
     print("Distribution of sick people by age groups")
-    distFunction(sickPeople, 'idadeDist')
+    distFunction(sickPeople, 'idadeDist', bins)
 
 def printDist(list, distMale, distFemale):
     #prints the frequencies and counts
@@ -62,30 +62,34 @@ def printDist(list, distMale, distFemale):
       
 def genderDist(lines):
     #creates a list to count how many sick people are in each gender
-    list = [0,0]
+    l = [0,0]
     total = 0
     #goes throught the dataframe and counts the sick males and females
     for x in range(0, len(lines.index)):
         if ((lines.iloc[x]['temDoença'] == 1) and (lines.iloc[x]['sexo']) == 'M'): 
-            list[0] += 1
+            l[0] += 1
             total += 1
         elif ((lines.iloc[x]['temDoença'] == 1) and (lines.iloc[x]['sexo']) == 'F'): 
-            list[1] += 1
+            l[1] += 1
             total += 1
     #calculates the percentages of sick males and females
-    distMale = round(list[0]/total, 4)
-    distFemale = round(list[1]/total, 4)
+    distMale = round(l[0]/total, 4)
+    distFemale = round(l[1]/total, 4)
     #prints the distribution table
-    printDist(list, distMale, distFemale)
+    printDist(l, distMale, distFemale)
+
+    plt.bar(['M', 'F'], [l[0], l[1]])
+    plt.xlabel("Gender")
+    plt.ylabel("Number of sick people")
+    plt.show()
     
 
 with open('myheart.csv') as csv_file:
     #ex.1, 2
-    csv_reader = csv.reader(csv_file, delimiter=',')
     lines = pd.read_csv('myheart.csv')
     #ex.3, 6, 7
     genderDist(lines)
     #ex.4, 6, 7
     ageGroups(lines)
     #ex.5, 6, 7
-    colesterolGroups(lines)
+    #colesterolGroups(lines)
